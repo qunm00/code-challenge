@@ -1,3 +1,15 @@
+# Setup
+
+1. Install dependencies
+```bash
+npm install
+```
+
+2. Start development server
+```bash
+npm run start
+```
+
 # Things have not done
 - Automated test.
 - User guide.
