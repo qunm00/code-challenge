@@ -45,7 +45,7 @@ function SwapCard() {
       fromAmount: amountFrom,
       toCurrency: selectedTo!,
       toAmount: amountTo,
-      createdAt: (new Date()).getTime()
+      createdAt: new Date().getTime(),
     });
     setSwapHistory(newHistory);
   };
@@ -106,7 +106,9 @@ function SwapCard() {
               />
             </div>
           </form>
-          {/* TODO display warning message if user is trying to swap same currency */}
+          {selectedFrom && selectedTo && selectedFrom === selectedTo ? (
+            <p>You are swapping the same currency. Are you sure? &#x1F914;</p>
+          ) : null}
         </CardContent>
         <CardFooter className="flex justify-end">
           <Button onClick={handleSwap} disabled={!canSwap}>
