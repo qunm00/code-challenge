@@ -34,7 +34,6 @@ function SwapCard() {
   const [swapHistory, setSwapHistory] = useState<ISwapHistory[] | []>([]);
 
   const handleSwap = () => {
-    // TODO display success toast if user successfully swap currency
     if (!canSwap) return;
     let newHistory = [...swapHistory];
     if (newHistory.length === HISTORY_MAX_LENGTH) {
@@ -46,6 +45,7 @@ function SwapCard() {
       fromAmount: amountFrom,
       toCurrency: selectedTo!,
       toAmount: amountTo,
+      createdAt: (new Date()).getTime()
     });
     setSwapHistory(newHistory);
   };

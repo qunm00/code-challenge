@@ -15,6 +15,7 @@ export type ISwapHistory = {
   fromAmount: ICurrency["price"];
   toCurrency: ICurrency["currency"];
   toAmount: ICurrency["price"];
+  createdAt: number;
 };
 
 export const useGetCurrency = () => {

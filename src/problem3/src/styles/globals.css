@@ -74,3 +74,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ! This solution does not scope to SwapHIstory component */
+li {
+  opacity: 1; /* Initial opacity for all items */
+  animation: fadeIn 0.5s ease-in-out forwards; /* Animation for new items */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
