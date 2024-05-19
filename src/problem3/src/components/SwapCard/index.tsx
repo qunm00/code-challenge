@@ -9,8 +9,15 @@ import {
 } from "@/components/ui/card";
 
 import SwapItem from "./SwapItem";
+import SwapHistory from "./SwapHistory";
 import { useEffect, useState } from "react";
-import { type ICurrency, useGetCurrency } from "./helpers";
+import {
+  type ICurrency,
+  useGetCurrency,
+  calculateSwapResult,
+  ISwapHistory,
+  HISTORY_MAX_LENGTH,
+} from "./helpers";
 
 function SwapCard() {
   const { currencySymbols, currencyMap, getData, loading, error } =
@@ -18,14 +25,30 @@ function SwapCard() {
   const [selectedFrom, setSelectedFrom] = useState<
     ICurrency["currency"] | null
   >(null);
-  const [amountFrom, setAmountFrom] = useState<number | null>(null);
+  const [amountFrom, setAmountFrom] = useState<number>(0);
+  const [amountTo, setAmountTo] = useState<number>(0);
   const [selectedTo, setSelectedTo] = useState<ICurrency["currency"] | null>(
     null
   );
   const [canSwap, setCanSwap] = useState<boolean | undefined>(undefined);
+  const [swapHistory, setSwapHistory] = useState<ISwapHistory[] | []>([]);
 
-  // TODO there should be a function that convert currency to usd then to the next
-  // - USD is medium of exchange here
+  const handleSwap = () => {
+    // TODO display success toast if user successfully swap currency
+    if (!canSwap) return;
+    let newHistory = [...swapHistory];
+    if (newHistory.length === HISTORY_MAX_LENGTH) {
+      newHistory.shift();
+    }
+    // selectedFrom and selectedTo can't be null since canSwap is true
+    newHistory.push({
+      fromCurrency: selectedFrom!,
+      fromAmount: amountFrom,
+      toCurrency: selectedTo!,
+      toAmount: amountTo,
+    });
+    setSwapHistory(newHistory);
+  };
 
   useEffect(() => {
     async function fetch() {
@@ -38,51 +61,60 @@ function SwapCard() {
     setCanSwap([selectedFrom, selectedTo, amountFrom].every((item) => !!item));
   }, [selectedFrom, selectedTo, amountFrom]);
 
-  const handleSwap = () => {
-    console.log("handleSwap");
-    console.log("canSwap", canSwap);
-    console.log("selectedFrom", selectedFrom);
-    console.log("selectedTo", selectedTo);
-    console.log("amountFrom", amountFrom);
+  useEffect(() => {
+    if (!canSwap) return;
+    // selectedFrom and selectedTo can't be null since canSwap is true
+    const swapResult = calculateSwapResult(
+      selectedFrom!,
+      selectedTo!,
+      amountFrom,
+      currencyMap
+    );
+    setAmountTo(swapResult);
+  }, [canSwap, selectedFrom, selectedTo, amountFrom, currencyMap]);
 
-    // TODO display success toast if user successfully swap currency
-  };
   return (
-    <Card className="w-[350px]">
-      <CardHeader>
-        <CardTitle>Currency Swap</CardTitle>
-        <CardDescription>
-          Swap from one currency to another currencies.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <div className="grid w-full items-center gap-4">
-            <SwapItem
-              title="Swap From"
-              data={currencySymbols}
-              setSelected={setSelectedFrom}
-              setAmount={setAmountFrom}
-              isAutoFocus={true}
-              isLoading={loading}
-            />
-            <SwapItem
-              title="Swap To"
-              data={currencySymbols}
-              setSelected={setSelectedTo}
-              isEditable={false}
-              isLoading={loading}
-            />
-          </div>
-        </form>
-        {/* TODO display warning message if user is trying to swap same currency */}
-      </CardContent>
-      <CardFooter className="flex justify-end">
-        <Button onClick={handleSwap} disabled={!canSwap}>
-          Swap
-        </Button>
-      </CardFooter>
-    </Card>
+    <div className="w-[350px]">
+      <SwapHistory swapHistory={swapHistory}></SwapHistory>
+      <div className="py-2"></div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Currency Swap</CardTitle>
+          <CardDescription>
+            Swap from one currency to another currencies.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form>
+            <div className="grid w-full items-center gap-4">
+              <SwapItem
+                title="Swap From"
+                data={currencySymbols}
+                setSelected={setSelectedFrom}
+                amount={amountFrom}
+                setAmount={setAmountFrom}
+                isAutoFocus={true}
+                isLoading={loading}
+              />
+              <SwapItem
+                title="Swap To"
+                data={currencySymbols}
+                setSelected={setSelectedTo}
+                amount={amountTo}
+                isEditable={false}
+                isLoading={loading}
+              />
+            </div>
+          </form>
+          {/* TODO display warning message if user is trying to swap same currency */}
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button onClick={handleSwap} disabled={!canSwap}>
+            Swap
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
 

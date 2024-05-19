@@ -9,11 +9,13 @@ import {
 import { Input } from "../ui/input";
 import { Skeleton } from "../ui/skeleton";
 import type { Dispatch, SetStateAction } from "react";
+import { ICurrency } from "./helpers";
 
 function SwapItem({
   title,
   data,
   setSelected,
+  amount,
   setAmount,
   isEditable = true,
   isAutoFocus = false,
@@ -22,7 +24,8 @@ function SwapItem({
   title: string;
   data: string[];
   setSelected: Dispatch<SetStateAction<string | null>>;
-  setAmount?: Dispatch<SetStateAction<number | null>>;
+  amount: ICurrency["price"];
+  setAmount?: Dispatch<SetStateAction<number>>;
   isEditable?: boolean;
   isAutoFocus?: boolean;
   isLoading?: boolean;
@@ -36,13 +39,10 @@ function SwapItem({
     );
   });
   const handleOnChange = (event: React.FormEvent<HTMLInputElement>) => {
-    // TODO should have debounce
-    const target = event.target as HTMLInputElement
-    console.log('event', event)
+    // could use debounce so that React does not render on every keystroke
+    const target = event.target as HTMLInputElement;
     if (!/[0-9]/.test(target.value)) {
-      // not very good user experience
-      // could have solved this better with a validation schema library
-      target.value = '';
+      target.value = "0";
     }
     if (setAmount) {
       setAmount(parseInt(target.value));
@@ -53,11 +53,13 @@ function SwapItem({
       <Label htmlFor={id} className="mb-1">
         {title}
       </Label>
-      <div className="grid grid-cols-[5fr_5fr_1fr] gap-2">
+      <div className="grid grid-rows-2 gap-2">
         {isLoading ? (
           <Skeleton></Skeleton>
         ) : (
           <Select onValueChange={(value) => setSelected(value)}>
+            {/* TODO icon */}
+            {/* could have prepend icon to select item instead of dynamically render icon */}
             <SelectTrigger id={id}>
               <SelectValue placeholder="Select" />
             </SelectTrigger>
@@ -68,8 +70,9 @@ function SwapItem({
           disabled={!isEditable}
           autoFocus={isAutoFocus}
           onChange={handleOnChange}
+          className="text-right"
+          value={amount}
         ></Input>
-        {/* TODO icon */}
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+export const HISTORY_MAX_LENGTH = 2;
+
 export type ICurrency = {
   currency: string;
   date: string; // can type ISO 8601 format
@@ -7,6 +9,13 @@ export type ICurrency = {
 };
 
 export type ICurrencyMap = Record<ICurrency["currency"], ICurrency>;
+
+export type ISwapHistory = {
+  fromCurrency: ICurrency["currency"];
+  fromAmount: ICurrency["price"];
+  toCurrency: ICurrency["currency"];
+  toAmount: ICurrency["price"];
+};
 
 export const useGetCurrency = () => {
   const [error, setError] = useState<string | null>(null);
@@ -52,3 +61,16 @@ export const useGetCurrency = () => {
 
   return { currencySymbols, currencyMap, getData, loading, error };
 };
+
+export const calculateSwapResult = (
+    fromCurrency: ICurrency["currency"],
+    toCurrency: ICurrency["currency"],
+    amountFrom: ICurrency["price"],
+    currencyMap: ICurrencyMap
+  ): ICurrency["price"] => {
+    const fromPrice = currencyMap[fromCurrency]["price"];
+    const toPrice = currencyMap[toCurrency]["price"];
+    const priceInUSD = amountFrom / fromPrice;
+    const amountTo = toPrice * priceInUSD;
+    return amountTo;
+  };
